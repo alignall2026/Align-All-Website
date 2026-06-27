@@ -406,9 +406,6 @@ if (clinicalForm) {
     const caseType = document.getElementById('caseType').value;
     const userMessage = document.getElementById('userMessage').value || 'N/A';
 
-    // Construct unified message body to fit Google Sheets layout
-    const formattedMessage = `WhatsApp: ${userWhatsapp}\nCase Type: ${caseType}\n\nMessage:\n${userMessage}`;
-
     const url = 'https://script.google.com/macros/s/AKfycbyH8XbYKkZeQyRTgi3QOXPdWPk9_rRfwLIVZiaWkgbZnW5OpBBuhaDhaeEALEkMHX6p/exec';
     
     // We send request as URLSearchParams so Apps Script e.parameter reads it correctly
@@ -418,7 +415,9 @@ if (clinicalForm) {
     params.append('userLocation', userLocation);
     params.append('userEmail', userEmail);
     params.append('userPhone', userPhone);
-    params.append('message', formattedMessage);
+    params.append('userWhatsapp', userWhatsapp);
+    params.append('caseType', caseType);
+    params.append('userMessage', userMessage);
 
     fetch(url, {
       method: 'POST',
