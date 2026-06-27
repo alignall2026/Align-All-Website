@@ -385,61 +385,33 @@ if (phoneScreen) {
 }
 
 // =============================================
-// 13. GOOGLE SHEETS FORM SUBMISSION HANDLER
+// 13. GOOGLE SHEETS FORM SUBMISSION HANDLER (IFRAME METHOD)
 // =============================================
+let formSubmitting = false;
+
+window.iframeSubmitted = function() {
+  if (formSubmitting) {
+    alert('Success! Your case request has been sent. We will get back to you shortly.');
+    const clinicalForm = document.getElementById('clinicalForm');
+    if (clinicalForm) clinicalForm.reset();
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+      submitBtn.textContent = 'Submit';
+      submitBtn.disabled = false;
+    }
+    formSubmitting = false;
+  }
+};
+
 const clinicalForm = document.getElementById('clinicalForm');
 if (clinicalForm) {
-  clinicalForm.addEventListener('submit', function(e) {
-    e.preventDefault();
+  clinicalForm.addEventListener('submit', function() {
+    formSubmitting = true;
     const submitBtn = document.getElementById('submitBtn');
-    const originalBtnText = submitBtn.textContent;
-    submitBtn.textContent = 'Submitting...';
-    submitBtn.disabled = true;
-
-    // Gather form input values
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const userLocation = document.getElementById('userLocation').value;
-    const userEmail = document.getElementById('userEmail').value;
-    const userPhone = document.getElementById('userPhone').value;
-    const userWhatsapp = document.getElementById('userWhatsapp').value || 'N/A';
-    const caseType = document.getElementById('caseType').value;
-    const userMessage = document.getElementById('userMessage').value || 'N/A';
-
-    const url = 'https://script.google.com/macros/s/AKfycbyH8XbYKkZeQyRTgi3QOXPdWPk9_rRfwLIVZiaWkgbZnW5OpBBuhaDhaeEALEkMHX6p/exec';
-    
-    // We send request as URLSearchParams so Apps Script e.parameter reads it correctly
-    const params = new URLSearchParams();
-    params.append('firstName', firstName);
-    params.append('lastName', lastName);
-    params.append('userLocation', userLocation);
-    params.append('userEmail', userEmail);
-    params.append('userPhone', userPhone);
-    params.append('userWhatsapp', userWhatsapp);
-    params.append('caseType', caseType);
-    params.append('userMessage', userMessage);
-
-    fetch(url, {
-      method: 'POST',
-      mode: 'no-cors', // Standard for Google Web Apps to avoid CORS errors
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: params.toString()
-    })
-    .then(() => {
-      // Success - clean form and show success message
-      alert('Success! Your case request has been sent. We will get back to you shortly.');
-      clinicalForm.reset();
-      submitBtn.textContent = originalBtnText;
-      submitBtn.disabled = false;
-    })
-    .catch(err => {
-      console.error('Error submitting form:', err);
-      alert('There was an error submitting your request. Please try again or contact us directly.');
-      submitBtn.textContent = originalBtnText;
-      submitBtn.disabled = false;
-    });
+    if (submitBtn) {
+      submitBtn.textContent = 'Submitting...';
+      submitBtn.disabled = true;
+    }
   });
 }
 

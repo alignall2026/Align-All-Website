@@ -761,7 +761,7 @@
         </div>
 
         <div class="contact-form-panel">
-          <form class="contact-form" id="clinicalForm" name="contact">
+          <form class="contact-form" id="clinicalForm" name="contact" action="https://script.google.com/macros/s/AKfycbyH8XbYKkZeQyRTgi3QOXPdWPk9_rRfwLIVZiaWkgbZnW5OpBBuhaDhaeEALEkMHX6p/exec" method="POST" target="hidden_iframe">
             <h3 class="form-header" id="formHeaderTitle">Get Started with Align-All</h3>
             
             <div class="form-row">
@@ -853,6 +853,9 @@
       </div>
     </div>
   </footer>
+
+  <!-- Hidden iframe to handle Google Sheets form submission without CORS issues -->
+  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(typeof iframeSubmitted !== 'undefined') iframeSubmitted();"></iframe>
 
   <script src="app.js"></script>
 </body>
