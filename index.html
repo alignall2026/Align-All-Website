@@ -610,25 +610,31 @@
                   </div>
                 </div>
 
-                <!-- Screen 3: Visual Tracker / Scan -->
+                <!-- Screen 3: 3D Arch Tracker -->
                 <div class="app-ui" data-screen="scan">
                   <div class="app-header">
-                    <div class="app-greeting">Visual Tracker 📸</div>
-                    <div class="app-date">Scan: Frontal View</div>
+                    <div class="app-greeting">3D Arch Tracker 🦷</div>
+                    <div class="app-date">Stage: <span id="stageNum">1</span> / 20</div>
                   </div>
-                  <div class="scan-camera-container">
-                    <div class="camera-lens">
-                      <div class="face-guide-oval"></div>
-                      <div class="scanner-laser-line"></div>
-                      <div class="scan-bracket br-top-left"></div>
-                      <div class="scan-bracket br-top-right"></div>
-                      <div class="scan-bracket br-bottom-left"></div>
-                      <div class="scan-bracket br-bottom-right"></div>
-                      <span class="camera-icon-overlay">📸 Scanning Face</span>
+                  <div class="arch-visual-container">
+                    <div class="aligner-overlay-glow" id="alignerGlow"></div>
+                    <div class="teeth-arch" id="teethArch">
+                      <div class="tooth-seg" style="--t-index: 1;"></div>
+                      <div class="tooth-seg" style="--t-index: 2;"></div>
+                      <div class="tooth-seg" style="--t-index: 3;"></div>
+                      <div class="tooth-seg" style="--t-index: 4;"></div>
+                      <div class="tooth-seg" style="--t-index: 5;"></div>
+                      <div class="tooth-seg" style="--t-index: 6;"></div>
+                      <div class="tooth-seg" style="--t-index: 7;"></div>
+                      <div class="tooth-seg" style="--t-index: 8;"></div>
                     </div>
                   </div>
-                  <div class="scan-status-text">
-                    <p class="blink-text">Analyzing alignment...</p>
+                  <div class="arch-slider-wrap">
+                    <input type="range" id="archSlider" min="1" max="20" value="1" class="arch-range-slider" />
+                    <div class="slider-labels">
+                      <span>Stage 1</span>
+                      <span>Stage 20</span>
+                    </div>
                   </div>
                 </div>
 

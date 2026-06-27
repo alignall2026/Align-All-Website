@@ -415,4 +415,111 @@ if (clinicalForm) {
   });
 }
 
+// =============================================
+// 14. 3D PHONE MOCKUP TILT EFFECT
+// =============================================
+const phoneContainer = document.querySelector('.app-visual-phone');
+const phoneFrame = document.querySelector('.phone-mockup');
+
+if (phoneContainer && phoneFrame) {
+  phoneContainer.addEventListener('mousemove', function(e) {
+    const rect = phoneContainer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // Calculate tilt angles (max 12 degrees)
+    const rotateX = ((centerY - y) / centerY) * 12;
+    const rotateY = ((x - centerX) / centerX) * 12;
+    
+    phoneFrame.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+  });
+  
+  phoneContainer.addEventListener('mouseleave', function() {
+    phoneFrame.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    phoneFrame.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  });
+  
+  phoneContainer.addEventListener('mouseenter', function() {
+    phoneFrame.style.transition = 'none';
+  });
+}
+
+// =============================================
+// 15. INTERACTIVE 3D ARCH STAGES SLIDER
+// =============================================
+const archSlider = document.getElementById('archSlider');
+const stageNum = document.getElementById('stageNum');
+const alignerGlow = document.getElementById('alignerGlow');
+const teethSegments = document.querySelectorAll('.tooth-seg');
+
+// Default target positions for teeth index 1 to 8 (fully aligned arch)
+const basePositions = {
+  1: { left: 15, top: 15, rotate: -55 },
+  2: { left: 30, top: 25, rotate: -35 },
+  3: { left: 47, top: 32, rotate: -15 },
+  4: { left: 65, top: 35, rotate: 0 },
+  5: { left: 83, top: 32, rotate: 15 },
+  6: { left: 100, top: 25, rotate: 35 },
+  7: { left: 115, top: 15, rotate: 55 },
+  8: { left: 122, top: 2, rotate: 70 }
+};
+
+// Misalignment offsets for Stage 1 (crooked teeth)
+const misalignmentOffsets = {
+  1: { rotate: -18, x: -3, y: 5 },
+  2: { rotate: 22, x: 2, y: -4 },
+  3: { rotate: -25, x: -4, y: 3 },
+  4: { rotate: 20, x: 3, y: -5 },
+  5: { rotate: -15, x: -2, y: 4 },
+  6: { rotate: 18, x: 4, y: -3 },
+  7: { rotate: -20, x: -3, y: 2 },
+  8: { rotate: 15, x: 2, y: -4 }
+};
+
+function updateTeethArch(stage) {
+  if (stageNum) stageNum.textContent = stage;
+  
+  // Interpolation factor (goes from 1 at Stage 1 down to 0 at Stage 20)
+  const factor = (20 - stage) / 19;
+  
+  teethSegments.forEach(seg => {
+    const idx = parseInt(getComputedStyle(seg).getPropertyValue('--t-index').trim());
+    const base = basePositions[idx];
+    const offset = misalignmentOffsets[idx];
+    
+    if (base && offset) {
+      // Interpolate angles and positions
+      const currentRotate = base.rotate + (offset.rotate * factor);
+      const currentX = (offset.x * factor);
+      const currentY = (offset.y * factor);
+      
+      seg.style.left = `${base.left + currentX}px`;
+      seg.style.top = `${base.top + currentY}px`;
+      seg.style.transform = `rotate(${currentRotate}deg)`;
+    }
+  });
+  
+  // Fade in aligner overlay glow at final stages (e.g. Stage 18-20)
+  if (alignerGlow) {
+    if (stage >= 18) {
+      const glowFactor = (stage - 17) / 3; // fades in from 0.33 to 1.0
+      alignerGlow.style.opacity = glowFactor;
+    } else {
+      alignerGlow.style.opacity = 0;
+    }
+  }
+}
+
+if (archSlider) {
+  archSlider.addEventListener('input', function(e) {
+    updateTeethArch(parseInt(e.target.value));
+  });
+  
+  // Initialize at Stage 1
+  updateTeethArch(1);
+}
+
 
