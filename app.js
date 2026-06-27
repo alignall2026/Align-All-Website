@@ -380,6 +380,14 @@ if (phoneScreen) {
     });
   }
 
+  const slider = document.getElementById('archSlider');
+  if (slider) {
+    slider.addEventListener('mousedown', () => clearInterval(autoRotateInterval));
+    slider.addEventListener('touchstart', () => clearInterval(autoRotateInterval));
+    slider.addEventListener('mouseup', () => resetAutoRotation());
+    slider.addEventListener('touchend', () => resetAutoRotation());
+  }
+
   // Initialize auto rotation
   startAutoRotation();
 }
