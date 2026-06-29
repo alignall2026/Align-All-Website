@@ -769,7 +769,12 @@
         </div>
 
         <div class="contact-form-panel">
-          <form class="contact-form" id="clinicalForm" name="contact" action="https://script.google.com/macros/s/AKfycbyH8XbYKkZeQyRTgi3QOXPdWPk9_rRfwLIVZiaWkgbZnW5OpBBuhaDhaeEALEkMHX6p/exec" method="POST" target="hidden_iframe">
+          <form class="contact-form" id="clinicalForm" name="contact">
+            <!-- Honeypot field to block automated spambots -->
+            <div style="display:none; opacity:0; position:absolute; width:0; height:0; overflow:hidden; pointer-events:none;" aria-hidden="true">
+              <label for="middleName">Middle Name</label>
+              <input type="text" id="middleName" name="middleName" tabindex="-1" autocomplete="off" />
+            </div>
             <h3 class="form-header" id="formHeaderTitle">Get Started with Align-All™</h3>
             
             <div class="form-row">
@@ -861,9 +866,6 @@
       </div>
     </div>
   </footer>
-
-  <!-- Hidden iframe to handle Google Sheets form submission without CORS issues -->
-  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(typeof iframeSubmitted !== 'undefined') iframeSubmitted();"></iframe>
 
   <script src="app.js"></script>
 </body>
