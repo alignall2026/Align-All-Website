@@ -1580,12 +1580,205 @@ body {
 .arch-range-slider::-webkit-slider-thumb:hover {
   transform: scale(1.2);
 }
-.slider-labels {
+.sidebar-labels {
   display: flex;
   justify-content: space-between;
   font-size: 10px;
   color: var(--text-muted);
   margin-top: 4px;
 }
+
+/* === GIVEAWAY BUTTONS === */
+.btn-giveaway {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #080C14 !important;
+  text-decoration: none;
+  padding: 12px 26px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+.btn-giveaway:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(255, 165, 0, 0.55);
+}
+.btn-giveaway-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #080C14 !important;
+  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.25);
+  margin-left: 10px;
+}
+.btn-giveaway-sm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 165, 0, 0.45);
+}
+
+/* Hide SM button on mobile in menu, and keep layouts clean */
+@media (max-width: 991px) {
+  .nav-cta .btn-giveaway-sm {
+    display: none;
+  }
+}
+
+/* === GIVEAWAY MODAL SYSTEM === */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 2000;
+  background: rgba(4, 6, 10, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.modal-content {
+  background: rgba(13, 20, 33, 0.95);
+  border: 1.5px solid rgba(255, 215, 0, 0.25);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 30px rgba(56, 211, 213, 0.05);
+  border-radius: 24px;
+  width: 90%;
+  max-width: 480px;
+  padding: 36px;
+  position: relative;
+  transform: scale(0.9) translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-overlay.active .modal-content {
+  transform: scale(1) translateY(0);
+}
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.05);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close:hover {
+  background: rgba(255, 215, 0, 0.2);
+  color: var(--gold);
+  transform: rotate(90deg);
+}
+.modal-header {
+  margin-bottom: 24px;
+  text-align: left;
+}
+.modal-badge {
+  display: inline-block;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  color: var(--gold);
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.modal-header h2 {
+  font-family: var(--font-main);
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+  line-height: 1.25;
+}
+.modal-header p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+#giveawayForm .form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+#giveawayForm label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+#giveawayForm input[type="text"],
+#giveawayForm input[type="tel"] {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+#giveawayForm input[type="text"]::placeholder,
+#giveawayForm input[type="tel"]::placeholder {
+  color: var(--text-muted);
+}
+#giveawayForm input[type="text"]:focus,
+#giveawayForm input[type="tel"]:focus {
+  border-color: var(--gold);
+  background: rgba(255, 215, 0, 0.04);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
+}
+#giveawayForm .form-help {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 5px;
+  line-height: 1.4;
+}
+#giveawayForm .form-submit-btn {
+  width: 100%;
+  margin-top: 10px;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+
 
 

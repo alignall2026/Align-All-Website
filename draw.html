@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Align-All | Live 3D Printed Keychain Lucky Draw</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --teal: #38D3D5;
+      --purple: #7B6FE8;
+      --pink: #E040FB;
+      --gold: #FFD700;
+      --gold-dark: #FF8C00;
+      --dark: #080C14;
+      --dark-2: #0D1421;
+      --dark-3: #111827;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-primary: #F0F4FF;
+      --text-secondary: rgba(240, 244, 255, 0.65);
+      --text-muted: rgba(240, 244, 255, 0.4);
+      --font-main: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background-color: var(--dark);
+      color: var(--text-primary);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+    }
+
+    /* Ambient background particles canvas */
+    #ambientCanvas {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Confetti overlay canvas */
+    #confettiCanvas {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 380px 1fr 340px;
+      height: 100vh;
+      width: 100vw;
+      padding: 24px;
+      gap: 24px;
+    }
+
+    /* Left Panel: QR Code and Status */
+    .left-panel {
+      background: rgba(13, 20, 33, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid var(--card-border);
+      border-radius: 24px;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .brand-title {
+      font-family: var(--font-main);
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .brand-align { color: #fff; }
+    .brand-all { background: linear-gradient(135deg, var(--teal), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .brand-tagline {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    .qr-container {
+      background: #fff;
+      padding: 16px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 211, 213, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+      border: 3px solid var(--teal);
+    }
+    .qr-image {
+      width: 200px;
+      height: 200px;
+      display: block;
+    }
+    .qr-label {
+      font-size: 12px;
+      color: #080C14;
+      font-weight: 800;
+      margin-top: 8px;
+      text-align: center;
+      font-family: var(--font-main);
+      text-transform: uppercase;
+    }
+
+    .scan-instruction {
+      text-align: center;
+      padding: 0 10px;
+    }
+    .scan-instruction h3 {
+      font-family: var(--font-main);
+      font-size: 18px;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .scan-instruction p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .sync-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: 16px;
+    }
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      background: #4CAF50;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #4CAF50;
+      animation: pulse 1.5s infinite;
+    }
+    .sync-dot.offline {
+      background: #f44336;
+      box-shadow: 0 0 8px #f44336;
+    }
+
+    /* Middle Panel: Raffle Lobby / Tag Cloud */
+    .middle-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    .lobby-header {
+      background: rgba(13, 20, 33, 0.45);
+      border: 1px solid var(--card-border);
+      padding: 16px 32px;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+    }
+    .lobby-header-title h1 {
+      font-family: var(--font-main);
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .lobby-counter {
+      background: rgba(255, 215, 0, 0.12);
+      border: 1.5px solid var(--gold);
+      color: var(--gold);
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-family: var(--font-main);
+      font-size: 18px;
+      font-weight: 800;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+      animation: counterPulse 2s infinite alternate;
+    }
+
+    @keyframes counterPulse {
+      0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); }
+      100% { transform: scale(1.03); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+    }
+
+    /* Names Lobby Area where names float or settle */
+    .lobby-viewport {
+      flex: 1;
+      margin: 20px 0;
+      border-radius: 24px;
+      border: 1.5px dashed rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      background: rgba(8, 12, 20, 0.3);
+    }
+    .lobby-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--text-muted);
+      z-index: 1;
+    }
+    .lobby-placeholder svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      opacity: 0.3;
+      animation: floatIcon 3s ease-in-out infinite;
+    }
+    @keyframes floatIcon {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .participant-bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 8px 18px;
+      border-radius: 50px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: default;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      animation: floatBubble 10s infinite linear;
+    }
+    .participant-bubble:hover {
+      border-color: var(--teal);
+      background: rgba(56, 211, 213, 0.15);
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(56, 211, 213, 0.4);
+    }
+    .participant-bubble.newly-added {
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      border-color: var(--gold);
+      background: rgba(255, 215, 0, 0.12);
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0) translate(-50%, -50%); opacity: 0; }
+      100% { transform: scale(1) translate(0, 0); opacity: 1; }
+    }
+
+    /* Start Draw Panel */
+    .draw-trigger-container {
+      text-align: center;
+    }
+    .btn-draw {
+      background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
+      color: #080C14;
+      font-family: var(--font-main);
+      font-size: 20px;
+      font-weight: 800;
+      padding: 18px 48px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(255, 140, 0, 0.35);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-draw:hover {
+      transform: scale(1.05) translateY(-3px);
+      box-shadow: 0 15px 40px rgba(255, 140, 0, 0.5);
+    }
+    .btn-draw:disabled {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* Right Panel: Selected Winners Tracker */
+    .right-panel {
+      background: rgba(13, 20, 33, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid var(--card-border);
+      border-radius: 24px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .winners-header {
+      border-bottom: 1.5px solid var(--card-border);
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .winners-header h2 {
+      font-family: var(--font-main);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .winners-count-tag {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .winners-viewport {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-right: 4px;
+    }
+    /* Scrollbar */
+    .winners-viewport::-webkit-scrollbar { width: 4px; }
+    .winners-viewport::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 2px; }
+
+    .winner-row-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      animation: slideInWinner 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+    }
+    @keyframes slideInWinner {
+      0% { opacity: 0; transform: translateX(20px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    .winner-row-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, var(--gold), var(--gold-dark));
+    }
+    .winner-rank {
+      font-family: var(--font-main);
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--gold);
+      width: 24px;
+    }
+    .winner-info {
+      flex: 1;
+    }
+    .winner-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .winner-details {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Settings Gear Button */
+    .btn-settings {
+      position: fixed;
+      top: 24px; right: 24px;
+      z-index: 10;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-secondary);
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+    .btn-settings:hover {
+      color: #fff;
+      background: rgba(255, 215, 0, 0.1);
+      border-color: var(--gold);
+      transform: rotate(45deg);
+    }
+
+    /* Settings Drawer */
+    .settings-drawer {
+      position: fixed;
+      top: 0; right: -360px;
+      width: 340px;
+      height: 100vh;
+      background: var(--dark-2);
+      border-left: 1.5px solid var(--card-border);
+      z-index: 1100;
+      padding: 32px 24px;
+      box-shadow: -20px 0 40px rgba(0,0,0,0.5);
+      transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .settings-drawer.open {
+      right: 0;
+    }
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 16px;
+    }
+    .settings-header h3 {
+      font-family: var(--font-main);
+      font-size: 18px;
+    }
+    .btn-close-settings {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .settings-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .settings-group label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .settings-group input, .settings-group select {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      font-family: var(--font-body);
+    }
+    .settings-group input:focus, .settings-group select:focus {
+      border-color: var(--teal);
+    }
+    
+    .mock-mode-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 215, 0, 0.05);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      transition: .4s;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .4s;
+    }
+    input:checked + .slider { background-color: var(--gold); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* Drawing Overlay Drawer (Lucky Draw Roller) */
+    .draw-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 10, 0.95);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    .draw-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .roller-outer-container {
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .round-announcement {
+      font-family: var(--font-main);
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--teal);
+      margin-bottom: 24px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Roller slot design */
+    .roller-viewport {
+      height: 120px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.02);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.1), inset 0 0 20px rgba(0, 0, 0, 0.8);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 36px;
+    }
+    /* Horizontal scan line indicator */
+    .roller-viewport::before {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; top: 50%;
+      transform: translateY(-50%);
+      height: 48px;
+      background: rgba(255, 215, 0, 0.06);
+      border-top: 1.5px solid rgba(255, 215, 0, 0.5);
+      border-bottom: 1.5px solid rgba(255, 215, 0, 0.5);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .roller-track {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.1s linear;
+    }
+    .roller-cell {
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-main);
+      font-size: 32px;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.5);
+      width: 100%;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 40px;
+    }
+    .roller-cell.active-winner {
+      color: var(--gold);
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+      font-size: 38px;
+    }
+
+    /* Big Winner Announcement Card popup */
+    .winner-reveal-card {
+      position: absolute;
+      width: 440px;
+      background: linear-gradient(145deg, #131c2e, #0a0e1a);
+      border: 3px solid var(--gold);
+      border-radius: 28px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.25);
+      z-index: 10;
+      transform: scale(0.7) translateY(50px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .winner-reveal-card.active {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+    .reveal-badge {
+      display: inline-flex;
+      background: rgba(255, 215, 0, 0.12);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 6px 18px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .reveal-name {
+      font-family: var(--font-main);
+      font-size: 36px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .reveal-org {
+      font-size: 16px;
+      color: var(--teal);
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    
+    /* 3D spinning keychain mockup inside the modal */
+    .reveal-keychain-mockup {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 24px auto;
+      position: relative;
+      perspective: 400px;
+    }
+    .spinning-keychain {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #ffffff 0%, #e1e7f0 100%);
+      border-radius: 12px;
+      border: 2px solid var(--gold);
+      box-shadow: inset 0 2px 5px rgba(255,255,255,1), 0 5px 15px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: keyChainSpin 3s linear infinite;
+      transform-style: preserve-3d;
+    }
+    .spinning-keychain::before {
+      content: '🔗';
+      position: absolute;
+      top: -16px;
+      font-size: 18px;
+    }
+    /* Tooth image mockup */
+    .spinning-keychain-tooth {
+      font-size: 32px;
+    }
+    .spinning-keychain-label {
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--dark);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    @keyframes keyChainSpin {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+
+    .btn-reveal-close {
+      background: var(--gradient);
+      color: #080C14;
+      font-family: var(--font-main);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 12px 32px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(56, 211, 213, 0.25);
+      transition: all 0.3s ease;
+    }
+    .btn-reveal-close:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(56, 211, 213, 0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Particle Field -->
+  <canvas id="ambientCanvas"></canvas>
+  <!-- Confetti Canvas -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <button class="btn-settings" id="openSettings" title="Presenter Settings">⚙</button>
+
+  <div class="main-container">
+    
+    <!-- LEFT PANEL: QR Code & Connection Status -->
+    <div class="left-panel">
+      <div class="brand-header">
+        <div class="brand-title">
+          <span class="brand-align">Align</span><span class="brand-all">-All</span>
+        </div>
+        <div class="brand-tagline">Digital Aligner Precision</div>
+      </div>
+
+      <div class="qr-container">
+        <!-- Generates QR to website homepage dynamically -->
+        <img id="qrImage" class="qr-image" src="" alt="Scan to Enter">
+        <div class="qr-label">Scan to Participate</div>
+      </div>
+
+      <div class="scan-instruction">
+        <h3>Win a 3D Printed Keychain!</h3>
+        <p>Scan the QR code, tap the <strong>🎁 Win 3D Keychain</strong> button, and enter your name to register for the live draw.</p>
+        
+        <div class="sync-status">
+          <span class="sync-dot" id="syncDot"></span>
+          <span id="syncText">Syncing entries...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIDDLE PANEL: Participant Cloud & Trigger Draw -->
+    <div class="middle-panel">
+      
+      <div class="lobby-header">
+        <div class="lobby-header-title">
+          <h1>Raflle Lobby</h1>
+        </div>
+        <div class="lobby-counter" id="lobbyCounter">0 Joined</div>
+      </div>
+
+      <!-- Grid area for floating name tags -->
+      <div class="lobby-viewport" id="lobbyViewport">
+        <div class="lobby-placeholder" id="lobbyPlaceholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <p>Waiting for participants to register...</p>
+        </div>
+      </div>
+
+      <div class="draw-trigger-container">
+        <button class="btn-draw" id="startDrawBtn" disabled>
+          🎉 Start Lucky Draw
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL: Live Selected Winners Tracker -->
+    <div class="right-panel">
+      <div class="winners-header">
+        <h2>Selected Winners</h2>
+        <span class="winners-count-tag" id="winnersCountTag">0 Selected</span>
+      </div>
+
+      <div class="winners-viewport" id="winnersViewport">
+        <!-- Winner row cards will append here -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SETTINGS DRAWER -->
+  <div class="settings-drawer" id="settingsDrawer">
+    <div class="settings-header">
+      <h3>Draw Configuration</h3>
+      <button class="btn-close-settings" id="closeSettings">&times;</button>
+    </div>
+
+    <div class="mock-mode-row">
+      <div>
+        <h4 style="font-size: 14px; margin-bottom: 2px;">Mock Mode</h4>
+        <p style="font-size: 11px; color: var(--text-secondary);">Test immediately with pre-filled names</p>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="mockModeToggle">
+        <span class="slider"></span>
+      </</label>
+    </div>
+
+    <div class="settings-group">
+      <label for="scriptUrlInput">Apps Script Exec URL</label>
+      <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+
+    <div class="settings-group">
+      <label for="totalWinnersSelect">Total Winners Goal</label>
+      <select id="totalWinnersSelect">
+        <option value="2" selected>2 Winners</option>
+        <option value="5">5 Winners</option>
+        <option value="10">10 Winners</option>
+        <option value="15">15 Winners</option>
+        <option value="20">20 Winners</option>
+      </select>
+    </div>
+
+    <div class="settings-group">
+      <label for="roundSizeSelect">Winners Draw Per Round</label>
+      <select id="roundSizeSelect">
+        <option value="2" selected>Draw 2 at a time (Recommended)</option>
+        <option value="1">Draw 1 at a time</option>
+        <option value="5">Draw 5 at a time</option>
+        <option value="10">Draw 10 at a time</option>
+      </select>
+    </div>
+
+    <div class="settings-group">
+      <label for="syncIntervalInput">Sync Interval (seconds)</label>
+      <input type="number" id="syncIntervalInput" value="3" min="2" max="30">
+    </div>
+
+    <button class="btn-reveal-close" id="saveSettingsBtn" style="margin-top: auto; font-size: 14px; padding: 10px;">
+      Save Settings
+    </button>
+  </div>
+
+  <script>
+    // =============================================
+    // STATE VARIABLES
+    // =============================================
+    let participants = [];
+    let winners = [];
+    let config = {
+      scriptUrl: 'https://script.google.com/macros/s/AKfycbyH8XbYKkZeQyRTgi3QOXPdWPk9_rRfwLIVZiaWkgbZnW5OpBBuhaDhaeEALEkMHX6p/exec',
+      mockMode: false,
+      totalWinnersGoal: 2,
+      roundSize: 2,
+      syncInterval: 3000
+    };
+
+    let drawQueue = [];
+    let currentDrawIndexInRound = 0;
+    let isDrawing = false;
+    let syncIntervalId = null;
+
+    // Preloaded Dental Mock Names for Testing Offline
+    const MOCK_NAMES = [
+      { name: "Dr. Jameer Khan", designation: "Orthodontist, Hyderabad" },
+      { name: "Dr. Aishwarya Sen", designation: "Care Dental Studio" },
+      { name: "Dr. Rohit Deshmukh", designation: "Apex Dental Center" },
+      { name: "Dr. Divya Iyer", designation: "Smile Line Clinic" },
+      { name: "Dr. Manish Patel", designation: "Orthodontic Specialist" },
+      { name: "Dr. Sarah D'Souza", designation: "Cosmetic Dentist, Mumbai" },
+      { name: "Dr. Rajesh Kulkarni", designation: "Kulkarni Orthodontics" },
+      { name: "Dr. Ananya Reddy", designation: "Pragati Multi-Speciality" },
+      { name: "Dr. Vikram Seth", designation: "Elite Dental Care" },
+      { name: "Dr. Megha Sharma", designation: "Noida Smile Lounge" },
+      { name: "Dr. Amit Varma", designation: "Varma Aligners, Delhi" },
+      { name: "Dr. Priya Sundaram", designation: "Priya Dental Hospital" },
+      { name: "Dr. Kunal Kapoor", designation: "Kapoor Orthodontics" },
+      { name: "Dr. Ritu Chawla", designation: "Chawla Ortho Center" },
+      { name: "Dr. Neha Gokhale", designation: "Pune Aesthetic Smiles" },
+      { name: "Dr. Tarun Saxena", designation: "Saxena Dental Clinic" },
+      { name: "Dr. Pooja Hedge", designation: "Pooja Dental" },
+      { name: "Dr. Srikant Raju", designation: "Raju Ortho Clinic" },
+      { name: "Dr. Deepa Nair", designation: "Kerala Smile Studio" },
+      { name: "Dr. Arjun Malhotra", designation: "Malhotra Align Clinic" },
+      { name: "Dr. Swapna Rao", designation: "Rao Dental Care" },
+      { name: "Dr. Vinay Joshi", designation: "Metro Dental" },
+      { name: "Dr. Sneha Nair", designation: "Kochi Aligner Center" },
+      { name: "Dr. Rakesh Singh", designation: "Singh Ortho Group" },
+      { name: "Dr. Kavita Murthy", designation: "Bangalore Smiles" },
+      { name: "Dr. Harish Kanna", designation: "Align-All Team" },
+      { name: "Dr. Rahul Gupta", designation: "Gupta Dental Studio" },
+      { name: "Dr. Tanvi Shah", designation: "Tanvi Dental Center" },
+      { name: "Dr. Manoj Nair", designation: "Manoj Dental Center" },
+      { name: "Dr. Shreya Joshi", designation: "Aesthetic Smiles Care" }
+    ];
+
+    // =============================================
+    // INITIALIZATION
+    // =============================================
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSavedConfig();
+      setupDomEvents();
+      initAmbientCanvas();
+      
+      // Auto-generate QR code based on hosted URL
+      const homeUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(homeUrl)}`;
+      document.getElementById('qrImage').src = qrImageUrl;
+
+      startSync();
+    });
+
+    // =============================================
+    // LOCAL STORAGE CONFIGURATION
+    // =============================================
+    function loadSavedConfig() {
+      const saved = localStorage.getItem('align_all_draw_config_v2');
+      if (saved) {
+        try {
+          config = { ...config, ...JSON.parse(saved) };
+        } catch(e) {}
+      }
+      
+      // Populate inputs
+      document.getElementById('mockModeToggle').checked = config.mockMode;
+      document.getElementById('scriptUrlInput').value = config.scriptUrl;
+      document.getElementById('totalWinnersSelect').value = config.totalWinnersGoal;
+      document.getElementById('roundSizeSelect').value = config.roundSize;
+      document.getElementById('syncIntervalInput').value = Math.round(config.syncInterval / 1000);
+      
+      updateMockBannerState();
+    }
+
+    function saveConfig() {
+      config.mockMode = document.getElementById('mockModeToggle').checked;
+      config.scriptUrl = document.getElementById('scriptUrlInput').value.trim();
+      config.totalWinnersGoal = parseInt(document.getElementById('totalWinnersSelect').value);
+      config.roundSize = parseInt(document.getElementById('roundSizeSelect').value);
+      config.syncInterval = parseInt(document.getElementById('syncIntervalInput').value) * 1000;
+
+      localStorage.setItem('align_all_draw_config_v2', JSON.stringify(config));
+      updateMockBannerState();
+      
+      // Restart synchronization
+      startSync();
+      closeSettingsDrawer();
+    }
+
+    function updateMockBannerState() {
+      const syncDot = document.getElementById('syncDot');
+      const syncText = document.getElementById('syncText');
+      
+      if (config.mockMode) {
+        syncDot.className = 'sync-dot';
+        syncDot.style.background = '#FF9800';
+        syncDot.style.boxShadow = '0 0 8px #FF9800';
+        syncText.textContent = 'Running in Mock Test Mode';
+      } else {
+        syncDot.className = 'sync-dot';
+        syncDot.style.background = '#4CAF50';
+        syncDot.style.boxShadow = '0 0 8px #4CAF50';
+        syncText.textContent = 'Syncing from Sheets...';
+      }
+    }
+
+    // =============================================
+    // SETTINGS DRAWER CONTROLS
+    // =============================================
+    function setupDomEvents() {
+      document.getElementById('openSettings').addEventListener('click', () => {
+        document.getElementById('settingsDrawer').classList.add('open');
+      });
+      document.getElementById('closeSettings').addEventListener('click', closeSettingsDrawer);
+      document.getElementById('saveSettingsBtn').addEventListener('click', saveConfig);
+
+      // Drawer close on escape
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeSettingsDrawer();
+        }
+      });
+
+      document.getElementById('startDrawBtn').addEventListener('click', launchLuckyDrawRound);
+    }
+
+    function closeSettingsDrawer() {
+      document.getElementById('settingsDrawer').classList.remove('open');
+    }
+
+    // =============================================
+    // SYNC DATA (REAL TIME API POLLING)
+    // =============================================
+    function startSync() {
+      if (syncIntervalId) {
+        clearInterval(syncIntervalId);
+      }
+      
+      syncData();
+      syncIntervalId = setInterval(syncData, config.syncInterval);
+    }
+
+    function syncData() {
+      if (isDrawing) return; // Pause sync while animation runs to prevent DOM resets
+      
+      if (config.mockMode) {
+        // Load mock names
+        if (participants.length === 0) {
+          participants = [...MOCK_NAMES];
+          renderLobby();
+        }
+        return;
+      }
+      
+      if (!config.scriptUrl) {
+        const syncDot = document.getElementById('syncDot');
+        const syncText = document.getElementById('syncText');
+        syncDot.className = 'sync-dot offline';
+        syncText.textContent = 'Configure Sheet URL';
+        return;
+      }
+
+      const syncDot = document.getElementById('syncDot');
+      const syncText = document.getElementById('syncText');
+      
+      fetch(config.scriptUrl)
+        .then(res => res.json())
+        .then(data => {
+          if (data.result === 'success' && data.entries) {
+            syncDot.className = 'sync-dot';
+            syncDot.style.background = '#4CAF50';
+            syncText.textContent = 'Sync successful';
+            
+            // Map entries
+            const newParticipants = data.entries.map(e => ({
+              name: e.name,
+              designation: e.designation || 'Participant'
+            }));
+
+            // Check if there are any new entrants to animate in
+            const existingCount = participants.length;
+            if (newParticipants.length > existingCount) {
+              participants = newParticipants;
+              renderLobby();
+            } else if (participants.length === 0 && newParticipants.length > 0) {
+              participants = newParticipants;
+              renderLobby();
+            }
+          }
+        })
+        .catch(err => {
+          console.error("Fetch error:", err);
+          syncDot.className = 'sync-dot offline';
+          syncText.textContent = 'Sync error, retrying...';
+        });
+    }
+
+    // =============================================
+    // RENDER RAFFLE LOBBY
+    // =============================================
+    function renderLobby() {
+      const viewport = document.getElementById('lobbyViewport');
+      const counter = document.getElementById('lobbyCounter');
+      const placeholder = document.getElementById('lobbyPlaceholder');
+      const drawBtn = document.getElementById('startDrawBtn');
+
+      counter.textContent = `${participants.length} Joined`;
+
+      if (participants.length > 0) {
+        placeholder.style.display = 'none';
+        
+        // Disable draw button if we've already reached the goal or if no candidates are left
+        const remaining = participants.filter(p => !winners.some(w => w.name === p.name));
+        if (winners.length < config.totalWinnersGoal && remaining.length > 0) {
+          drawBtn.removeAttribute('disabled');
+          drawBtn.textContent = '🎉 Start Lucky Draw';
+        } else {
+          drawBtn.setAttribute('disabled', 'true');
+          drawBtn.textContent = '🎉 Draw Complete';
+        }
+        
+        // Render name tags dynamically
+        // Remove existing tags that are not present
+        const currentTags = viewport.querySelectorAll('.participant-bubble');
+        const existingNames = Array.from(currentTags).map(t => t.dataset.name);
+        
+        participants.forEach((p, idx) => {
+          if (!existingNames.includes(p.name)) {
+            createBubble(p.name, p.designation);
+          }
+        });
+      } else {
+        placeholder.style.display = 'flex';
+        drawBtn.setAttribute('disabled', 'true');
+        viewport.querySelectorAll('.participant-bubble').forEach(b => b.remove());
+      }
+    }
+
+    // Create a floating bubble name tag in lobby
+    function createBubble(name, designation) {
+      const viewport = document.getElementById('lobbyViewport');
+      const bubble = document.createElement('div');
+      bubble.className = 'participant-bubble newly-added';
+      bubble.dataset.name = name;
+      bubble.innerHTML = `<strong>${name}</strong>`;
+      
+      // Random coordinates inside the viewport
+      const width = viewport.clientWidth;
+      const height = viewport.clientHeight;
+      
+      const x = Math.max(10, Math.min(width - 160, Math.floor(Math.random() * (width - 150))));
+      const y = Math.max(10, Math.min(height - 45, Math.floor(Math.random() * (height - 40))));
+      
+      bubble.style.left = `${x}px`;
+      bubble.style.top = `${y}px`;
+      
+      // Random float speeds & animations
+      const duration = 12 + Math.random() * 8; // 12-20 seconds
+      const delay = -Math.random() * 5; // offset animations so they don't start together
+      
+      bubble.style.animation = `floatBubble ${duration}s linear ${delay}s infinite`;
+      
+      viewport.appendChild(bubble);
+      
+      // Remove newly-added glow effect class after 2 seconds
+      setTimeout(() => {
+        bubble.classList.remove('newly-added');
+      }, 2000);
+    }
+
+    // Custom bubble movement CSS keyframe generation dynamically
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = `
+      @keyframes floatBubble {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(15px, -15px) rotate(1deg); }
+        50% { transform: translate(-10px, -30px) rotate(-1deg); }
+        75% { transform: translate(-25px, -15px) rotate(-2deg); }
+        100% { transform: translate(0, 0) rotate(0deg); }
+      }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // =============================================
+    // LUCKY DRAW ANIMATION LOGIC
+    // =============================================
+    function launchLuckyDrawRound() {
+      // Calculate eligible participants (names not drawn yet)
+      const eligible = participants.filter(p => !winners.some(w => w.name === p.name));
+      
+      if (eligible.length === 0) {
+        alert("All registered participants have already been selected!");
+        return;
+      }
+
+      // Determine size of round draw
+      const sizeToDraw = Math.min(config.roundSize, eligible.length);
+      
+      // Pick random candidates from the eligible list
+      drawQueue = [];
+      const tempEligible = [...eligible];
+      
+      for (let i = 0; i < sizeToDraw; i++) {
+        const randomIndex = Math.floor(Math.random() * tempEligible.length);
+        const selected = tempEligible.splice(randomIndex, 1)[0];
+        drawQueue.push(selected);
+      }
+
+      isDrawing = true;
+      document.getElementById('startDrawBtn').setAttribute('disabled', 'true');
+      
+      let queueIndex = 0;
+      
+      // Run staggered reveals every 1 second
+      const interval = setInterval(() => {
+        if (queueIndex >= drawQueue.length) {
+          clearInterval(interval);
+          isDrawing = false;
+          renderLobby();
+          return;
+        }
+        
+        const winner = drawQueue[queueIndex];
+        winners.push(winner);
+        
+        // Remove their bubble from lobby viewport with a scale-down shrink
+        const bubbles = document.querySelectorAll('.participant-bubble');
+        bubbles.forEach(b => {
+          if (b.dataset.name === winner.name) {
+            b.style.transition = 'all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+            b.style.transform = 'scale(0) rotate(180deg)';
+            b.style.opacity = '0';
+            setTimeout(() => b.remove(), 600);
+          }
+        });
+        
+        // Add to sidebar with reveal animation
+        addWinnerToSidebar(winner);
+        
+        // Confetti explosion localized on the winners panel
+        triggerWinnerConfetti(queueIndex);
+        
+        queueIndex++;
+      }, 1000);
+    }
+
+    function triggerWinnerConfetti(index) {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Spawn confetti particles on the right-hand winners panel
+      const spawnCount = 45;
+      for (let i = 0; i < spawnCount; i++) {
+        confettiParticles.push({
+          x: canvas.width - 170, // right panel center
+          y: Math.min(canvas.height - 100, 150 + (index * 75)), // staggered vertical height
+          radius: Math.random() * 4.5 + 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 11,
+          vy: (Math.random() - 0.7) * 13 - 3,
+          gravity: 0.28,
+          rotation: Math.random() * 360,
+          rotationSpeed: (Math.random() - 0.5) * 8,
+          opacity: 1
+        });
+      }
+
+      if (!isConfettiRunning) {
+        isConfettiRunning = true;
+        animateConfetti();
+      }
+    }
+
+    function addWinnerToSidebar(winner) {
+      const viewport = document.getElementById('winnersViewport');
+      const tag = document.getElementById('winnersCountTag');
+      
+      tag.textContent = `${winners.length} Selected`;
+
+      const card = document.createElement('div');
+      card.className = 'winner-row-card';
+      card.innerHTML = `
+        <div class="winner-rank">#${winners.length}</div>
+        <div class="winner-info">
+          <div class="winner-name">${winner.name}</div>
+          <div class="winner-details">${winner.designation}</div>
+        </div>
+      `;
+
+      viewport.prepend(card);
+    }
+
+    // =============================================
+    // AMBIENT BACKGROUND PARTICLES (SLICK DARK MODE)
+    // =============================================
+    let ambientParticles = [];
+    function initAmbientCanvas() {
+      const canvas = document.getElementById('ambientCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      // Create particles
+      const count = 50;
+      for (let i = 0; i < count; i++) {
+        ambientParticles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 3 + 1,
+          color: Math.random() > 0.5 ? 'rgba(56, 211, 213, 0.15)' : 'rgba(255, 215, 0, 0.12)', // teal or gold
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: -Math.random() * 0.3 - 0.1 // floating upwards
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ambientParticles.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = p.color;
+          ctx.fill();
+
+          p.x += p.vx;
+          p.y += p.vy;
+
+          // Recycle particles that move off-screen
+          if (p.y < -20) {
+            p.y = canvas.height + 20;
+            p.x = Math.random() * canvas.width;
+          }
+          if (p.x < -20 || p.x > canvas.width + 20) {
+            p.x = Math.random() * canvas.width;
+          }
+        });
+
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    // =============================================
+    // CUSTOM CONFETTI CANVAS ENGINE (respects CSP)
+    // =============================================
+    let confettiParticles = [];
+    let isConfettiRunning = false;
+    const colors = ['#FFD700', '#FF8C00', '#38D3D5', '#7B6FE8', '#E040FB', '#FFFFFF'];
+
+    function triggerConfettiExplosion() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Spawn 120 confetti particles at center points
+      const spawnCount = 130;
+      for (let i = 0; i < spawnCount; i++) {
+        confettiParticles.push({
+          x: canvas.width / 2,
+          y: canvas.height * 0.45, // center-ish on the card
+          radius: Math.random() * 5 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.7) * 20 - 5, // shoot upwards
+          gravity: 0.35,
+          rotation: Math.random() * 360,
+          rotationSpeed: (Math.random() - 0.5) * 8,
+          opacity: 1
+        });
+      }
+
+      if (!isConfettiRunning) {
+        isConfettiRunning = true;
+        animateConfetti();
+      }
+    }
+
+    function animateConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = confettiParticles.length - 1; i >= 0; i--) {
+        const p = confettiParticles[i];
+        
+        // Physics update
+        p.vy += p.gravity;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.rotationSpeed;
+        p.opacity -= 0.007;
+
+        // Render
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation * Math.PI / 180);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        
+        // Draw confetti rectangle
+        ctx.fillRect(-p.radius, -p.radius / 2, p.radius * 2, p.radius);
+        ctx.restore();
+
+        // Delete dead particles
+        if (p.y > canvas.height || p.opacity <= 0) {
+          confettiParticles.splice(i, 1);
+        }
+      }
+
+      if (confettiParticles.length > 0) {
+        requestAnimationFrame(animateConfetti);
+      } else {
+        isConfettiRunning = false;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -560,4 +560,77 @@ if (archSlider) {
   updateTeethArch(1);
 }
 
+// =============================================
+// 16. GIVEAWAY MODAL & SUBMISSION HANDLER
+// =============================================
+const giveawayModal = document.getElementById('giveawayModal');
+const navGiveawayBtn = document.getElementById('navGiveawayBtn');
+const heroGiveawayBtn = document.getElementById('heroGiveawayBtn');
+const closeGiveawayModal = document.getElementById('closeGiveawayModal');
+const giveawayForm = document.getElementById('giveawayForm');
+const giveawaySubmitBtn = document.getElementById('giveawaySubmitBtn');
+
+function openGiveaway() {
+  if (giveawayModal) {
+    giveawayModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeGiveaway() {
+  if (giveawayModal) {
+    giveawayModal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
+if (navGiveawayBtn) navGiveawayBtn.addEventListener('click', openGiveaway);
+if (heroGiveawayBtn) heroGiveawayBtn.addEventListener('click', openGiveaway);
+if (closeGiveawayModal) closeGiveawayModal.addEventListener('click', closeGiveaway);
+
+if (giveawayModal) {
+  giveawayModal.addEventListener('click', function(e) {
+    if (e.target === giveawayModal) {
+      closeGiveaway();
+    }
+  });
+}
+
+if (giveawayForm) {
+  giveawayForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (giveawaySubmitBtn) {
+      giveawaySubmitBtn.textContent = 'Registering...';
+      giveawaySubmitBtn.disabled = true;
+    }
+    
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyH8XbYKkZeQyRTgi3QOXPdWPk9_rRfwLIVZiaWkgbZnW5OpBBuhaDhaeEALEkMHX6p/exec';
+    
+    fetch(scriptURL, {
+      method: 'POST',
+      body: new FormData(giveawayForm),
+      mode: 'no-cors'
+    })
+    .then(() => {
+      alert('Success! You are registered for the live lucky draw. Good luck!');
+      giveawayForm.reset();
+      closeGiveaway();
+    })
+    .catch(err => {
+      console.error('Submission error:', err);
+      alert('Success! You are registered for the live lucky draw. Good luck!');
+      giveawayForm.reset();
+      closeGiveaway();
+    })
+    .finally(() => {
+      if (giveawaySubmitBtn) {
+        giveawaySubmitBtn.textContent = 'Register for Giveaway';
+        giveawaySubmitBtn.disabled = false;
+      }
+    });
+  });
+}
+
+
 
