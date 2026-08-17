@@ -158,7 +158,12 @@ body {
 .nav-link.active::after {
   left: 14px; right: 14px;
 }
-.nav-cta { margin-left: 8px; }
+.nav-cta {
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .btn-primary-sm {
   display: inline-flex; align-items: center;
   background: var(--gradient);
