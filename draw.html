@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Align-All | Live 3D Printed Keychain Lucky Draw</title>
+  <title>Align-All | Live 3D Printed Model Lucky Draw</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -658,15 +658,15 @@
       margin-bottom: 24px;
     }
     
-    /* 3D spinning keychain mockup inside the modal */
-    .reveal-keychain-mockup {
+    /* 3D spinning model mockup */
+    .reveal-model-mockup {
       width: 90px;
       height: 90px;
       margin: 0 auto 24px auto;
       position: relative;
       perspective: 400px;
     }
-    .spinning-keychain {
+    .spinning-model {
       width: 100%;
       height: 100%;
       background: linear-gradient(135deg, #ffffff 0%, #e1e7f0 100%);
@@ -677,20 +677,20 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      animation: keyChainSpin 3s linear infinite;
+      animation: modelSpin 3s linear infinite;
       transform-style: preserve-3d;
     }
-    .spinning-keychain::before {
-      content: '🔗';
+    .spinning-model::before {
+      content: '🦷';
       position: absolute;
       top: -16px;
       font-size: 18px;
     }
     /* Tooth image mockup */
-    .spinning-keychain-tooth {
+    .spinning-model-tooth {
       font-size: 32px;
     }
-    .spinning-keychain-label {
+    .spinning-model-label {
       font-size: 9px;
       font-weight: 800;
       color: var(--dark);
@@ -699,7 +699,7 @@
       margin-top: 4px;
     }
 
-    @keyframes keyChainSpin {
+    @keyframes modelSpin {
       0% { transform: rotateY(0deg); }
       100% { transform: rotateY(360deg); }
     }
@@ -750,8 +750,8 @@
       </div>
 
       <div class="scan-instruction">
-        <h3>Win a 3D Printed Keychain!</h3>
-        <p>Scan the QR code, tap the <strong>🎁 Win 3D Keychain</strong> button, and enter your name to register for the live draw.</p>
+        <h3>Win a 3D Printed Model!</h3>
+        <p>Scan the QR code, tap the <strong>🎁 Win 3D Model</strong> button, and enter your name to register for the live draw.</p>
         
         <div class="sync-status">
           <span class="sync-dot" id="syncDot"></span>
