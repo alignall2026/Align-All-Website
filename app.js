@@ -605,7 +605,7 @@ if (giveawayForm) {
       giveawaySubmitBtn.disabled = true;
     }
     
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbyH8XbYKkZeQyRTgi3QOXPdWPk9_rRfwLIVZiaWkgbZnW5OpBBuhaDhaeEALEkMHX6p/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwU69GyUmt7A7Tj698AlwCsIYEnfIqyPc-KoZRnRdRFJNAnB7t_e68MqJmYJpPOumvM/exec';
     
     fetch(scriptURL, {
       method: 'POST',
