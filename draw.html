@@ -963,7 +963,13 @@
       const saved = localStorage.getItem('align_all_draw_config_v2');
       if (saved) {
         try {
-          config = { ...config, ...JSON.parse(saved) };
+          const parsed = JSON.parse(saved);
+          // Auto-migrate from the old script URL to the new one if cached in localStorage
+          if (parsed.scriptUrl && parsed.scriptUrl.includes('AKfycbyH8XbYKkZeQyRTgi3QOXPdWPk9_rRfwLIVZiaWkgbZnW5OpBBuhaDhaeEALEkMHX6p')) {
+            parsed.scriptUrl = 'https://script.google.com/macros/s/AKfycbwU69GyUmt7A7Tj698AlwCsIYEnfIqyPc-KoZRnRdRFJNAnB7t_e68MqJmYJpPOumvM/exec';
+            localStorage.setItem('align_all_draw_config_v2', JSON.stringify(parsed));
+          }
+          config = { ...config, ...parsed };
         } catch(e) {}
       }
       
