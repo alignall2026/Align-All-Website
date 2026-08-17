@@ -23,6 +23,7 @@
       --text-primary: #F0F4FF;
       --text-secondary: rgba(240, 244, 255, 0.65);
       --text-muted: rgba(240, 244, 255, 0.4);
+      --gradient: linear-gradient(135deg, var(--teal), var(--gold));
       --font-main: 'Outfit', sans-serif;
       --font-body: 'Inter', sans-serif;
     }
@@ -820,7 +821,7 @@
       <label class="switch">
         <input type="checkbox" id="mockModeToggle">
         <span class="slider"></span>
-      </</label>
+      </label>
     </div>
 
     <div class="settings-group">
@@ -857,6 +858,33 @@
     <button class="btn-reveal-close" id="saveSettingsBtn" style="margin-top: auto; font-size: 14px; padding: 10px;">
       Save Settings
     </button>
+  </div>
+
+  <!-- Drawing Overlay (Lucky Draw Roller Spinner) -->
+  <div class="draw-overlay" id="drawOverlay">
+    <div class="roller-outer-container">
+      <div class="round-announcement" id="roundAnnouncement">Drawing Winner...</div>
+      
+      <div class="roller-viewport">
+        <div class="roller-track" id="rollerTrack">
+          <!-- Dynamically populated roller cells -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- Big Winner Announcement Card popup -->
+    <div class="winner-reveal-card" id="winnerRevealCard">
+      <div class="reveal-badge">Winner Selected</div>
+      <div class="reveal-model-mockup">
+        <div class="spinning-model">
+          <span class="spinning-model-tooth">🦷</span>
+          <span class="spinning-model-label">Align-All</span>
+        </div>
+      </div>
+      <div class="reveal-name" id="revealName">Winner Name</div>
+      <div class="reveal-org" id="revealOrg">Clinic / Designation</div>
+      <button class="btn-reveal-close" id="claimCloseBtn">Close & Continue</button>
+    </div>
   </div>
 
   <script>
@@ -990,6 +1018,7 @@
       });
       document.getElementById('closeSettings').addEventListener('click', closeSettingsDrawer);
       document.getElementById('saveSettingsBtn').addEventListener('click', saveConfig);
+      document.getElementById('claimCloseBtn').addEventListener('click', advanceQueue);
 
       // Drawer close on escape
       window.addEventListener('keydown', (e) => {
@@ -1185,22 +1214,87 @@
 
       isDrawing = true;
       document.getElementById('startDrawBtn').setAttribute('disabled', 'true');
+      document.getElementById('openSettings').style.display = 'none'; // Hide settings gear during active draw
       
-      let queueIndex = 0;
+      currentDrawIndexInRound = 0;
       
-      // Run staggered reveals every 1 second
-      const interval = setInterval(() => {
-        if (queueIndex >= drawQueue.length) {
-          clearInterval(interval);
-          isDrawing = false;
-          renderLobby();
-          return;
+      // Show overlay
+      document.getElementById('drawOverlay').classList.add('active');
+      
+      // Start sequential draw
+      drawNextWinnerInQueue();
+    }
+
+    function drawNextWinnerInQueue() {
+      if (currentDrawIndexInRound >= drawQueue.length) {
+        // Complete the round, close overlay
+        document.getElementById('drawOverlay').classList.remove('active');
+        document.getElementById('openSettings').style.display = ''; // Show settings gear again
+        isDrawing = false;
+        renderLobby();
+        return;
+      }
+      
+      const winner = drawQueue[currentDrawIndexInRound];
+      const eligible = participants.filter(p => !winners.some(w => w.name === p.name));
+      
+      // Update round info
+      document.getElementById('roundAnnouncement').textContent = `Drawing Winner ${currentDrawIndexInRound + 1} of ${drawQueue.length}`;
+      
+      // Populate roller track with random names, placing the winner near the end
+      const rollerTrack = document.getElementById('rollerTrack');
+      rollerTrack.innerHTML = '';
+      
+      const cellsCount = 40;
+      const targetIndex = cellsCount - 3; // Land exactly on index 37
+      
+      for (let i = 0; i < cellsCount; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'roller-cell';
+        
+        let person;
+        if (i === targetIndex) {
+          person = winner;
+        } else {
+          // Fill other cells with random names from eligible participants
+          person = eligible[Math.floor(Math.random() * eligible.length)] || winner;
         }
         
-        const winner = drawQueue[queueIndex];
+        cell.textContent = person.name;
+        rollerTrack.appendChild(cell);
+      }
+      
+      // Reset track position before starting animation
+      rollerTrack.style.transition = 'none';
+      rollerTrack.style.transform = 'translateY(0px)';
+      
+      // Force layout calculation
+      rollerTrack.offsetHeight;
+      
+      // Animate slide
+      rollerTrack.style.transition = 'transform 4.5s cubic-bezier(0.1, 0.8, 0.1, 1)';
+      rollerTrack.style.transform = `translateY(-${targetIndex * 120}px)`;
+      
+      // On spin completion
+      setTimeout(() => {
+        // Highlight active winner cell
+        const winnerCell = rollerTrack.children[targetIndex];
+        if (winnerCell) {
+          winnerCell.classList.add('active-winner');
+        }
+        
+        // Show winner reveal card
+        document.getElementById('revealName').textContent = winner.name;
+        document.getElementById('revealOrg').textContent = winner.designation || 'Participant';
+        document.getElementById('winnerRevealCard').classList.add('active');
+        
+        // Add to global winners state so they are registered as drawn
         winners.push(winner);
         
-        // Remove their bubble from lobby viewport with a scale-down shrink
+        // Confetti explosion
+        triggerConfettiExplosion();
+        
+        // Remove their bubble from lobby viewport
         const bubbles = document.querySelectorAll('.participant-bubble');
         bubbles.forEach(b => {
           if (b.dataset.name === winner.name) {
@@ -1210,45 +1304,22 @@
             setTimeout(() => b.remove(), 600);
           }
         });
-        
-        // Add to sidebar with reveal animation
-        addWinnerToSidebar(winner);
-        
-        // Confetti explosion localized on the winners panel
-        triggerWinnerConfetti(queueIndex);
-        
-        queueIndex++;
-      }, 1000);
+      }, 4600);
     }
 
-    function triggerWinnerConfetti(index) {
-      const canvas = document.getElementById('confettiCanvas');
-      const ctx = canvas.getContext('2d');
+    function advanceQueue() {
+      // Hide winner reveal card
+      document.getElementById('winnerRevealCard').classList.remove('active');
       
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-
-      // Spawn confetti particles on the right-hand winners panel
-      const spawnCount = 45;
-      for (let i = 0; i < spawnCount; i++) {
-        confettiParticles.push({
-          x: canvas.width - 170, // right panel center
-          y: Math.min(canvas.height - 100, 150 + (index * 75)), // staggered vertical height
-          radius: Math.random() * 4.5 + 2,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          vx: (Math.random() - 0.5) * 11,
-          vy: (Math.random() - 0.7) * 13 - 3,
-          gravity: 0.28,
-          rotation: Math.random() * 360,
-          rotationSpeed: (Math.random() - 0.5) * 8,
-          opacity: 1
-        });
+      // Retrieve the winner that was just drawn
+      const winner = drawQueue[currentDrawIndexInRound];
+      if (winner) {
+        addWinnerToSidebar(winner);
       }
-
-      if (!isConfettiRunning) {
-        isConfettiRunning = true;
-        animateConfetti();
-      }
+      
+      // Proceed to the next winner in the queue
+      currentDrawIndexInRound++;
+      drawNextWinnerInQueue();
     }
 
     function addWinnerToSidebar(winner) {
